@@ -31,7 +31,7 @@ def chat_with_gemini(input_query):
 
 # Streamlit app UI
 def main():
-    st.title("General-Purpose Chatbot")
+    st.title("Chatbot AI Project")
     st.write("Welcome to the chatbot! Ask me anything.")
 
     # Initialize session state for chat history
