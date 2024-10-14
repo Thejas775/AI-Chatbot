@@ -21,9 +21,12 @@ def main():
     model = genai.GenerativeModel(model_name="gemini-1.5-flash")
     chat_session = model.start_chat(history=[])
 
-    # List to store conversation history
+    # Initialize session state for storing conversation history and user input
     if 'history' not in st.session_state:
         st.session_state.history = []
+
+    if 'user_input' not in st.session_state:
+        st.session_state.user_input = ""
 
     # Get user input
     user_input = st.text_input("You:", key="user_input")
