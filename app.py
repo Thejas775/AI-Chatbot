@@ -19,14 +19,12 @@ def main():
     # Initialize Gemini API and create a chat session
     initialize_gemini()
     model = genai.GenerativeModel(model_name="gemini-1.5-flash")
-    chat_session = model.start_chat(history=[])
-
-    # Initialize session state for storing conversation history and user input
+    
+    # Initialize session state for storing conversation history and chat session
     if 'history' not in st.session_state:
         st.session_state.history = []
-
-    if 'user_input' not in st.session_state:
-        st.session_state.user_input = ""
+    if 'chat_session' not in st.session_state:
+        st.session_state.chat_session = model.start_chat(history=[])
 
     # Get user input
     user_input = st.text_input("You:", key="user_input")
@@ -39,7 +37,7 @@ def main():
 
             # Get chatbot's response
             with st.spinner("Thinking..."):
-                bot_response = chat_with_gemini(user_input, chat_session)
+                bot_response = chat_with_gemini(user_input, st.session_state.chat_session)
             
             # Append bot response to history
             st.session_state.history.append(("Bot", bot_response))
