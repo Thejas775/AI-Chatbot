@@ -49,7 +49,7 @@ def main():
 
     # Display the conversation history
     if st.session_state.history:
-        st.write("### Conversation:")
+        st.write("## Conversation:")
         for speaker, message in st.session_state.history:
             st.markdown(f"**{speaker}:** {message}")
 
