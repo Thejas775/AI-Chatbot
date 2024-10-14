@@ -5,51 +5,62 @@ import google.generativeai as genai
 def initialize_gemini():
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
-# Function to interact with Gemini Chatbot
-def chat_with_gemini(user_message, chat_session):
-    # Send the user message to the chat session
-    response = chat_session.send_message(user_message)
+def chat_with_gemini(input_query):
+    # Initialize the model configuration
+    generation_config = {
+        "temperature": 0.7,
+        "top_p": 0.95,
+        "top_k": 50,
+        "max_output_tokens": 1000,
+    }
+
+    # Initialize the model with the specified configuration
+    model = genai.GenerativeModel(
+        model_name="gemini-1.5-flash",
+        generation_config=generation_config,
+    )
+
+    # Start a new chat session
+    chat_session = model.start_chat(history=[])
+
+    # Send the message and get a response
+    response = chat_session.send_message(input_query)
+
+    # Return the generated response
     return response.text.strip()
 
 # Streamlit app UI
 def main():
-    st.title("Gemini AI Chatbot")
-    st.write("Chat with the AI-powered chatbot below.")
+    st.title("General-Purpose Chatbot")
+    st.write("Welcome to the chatbot! Ask me anything.")
 
-    # Initialize Gemini API and create a chat session
-    initialize_gemini()
-    model = genai.GenerativeModel(model_name="gemini-1.5-flash")
-    
-    # Initialize session state for storing conversation history and chat session
-    if 'history' not in st.session_state:
-        st.session_state.history = []
-    if 'chat_session' not in st.session_state:
-        st.session_state.chat_session = model.start_chat(history=[])
+    # Initialize session state for chat history
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
 
-    # Get user input
-    user_input = st.text_input("You:", key="user_input")
+    # Display chat history
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-    # When the user submits a message
-    if st.button("Send"):
-        if user_input.strip() != "":
-            # Append user message to history
-            st.session_state.history.append(("You", user_input))
+    # Chat input
+    if prompt := st.chat_input("What's on your mind?"):
+        # Add user message to chat history
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        
+        # Display user message
+        with st.chat_message("user"):
+            st.markdown(prompt)
 
-            # Get chatbot's response
+        # Generate response
+        with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
-                bot_response = chat_with_gemini(user_input, st.session_state.chat_session)
-            
-            # Append bot response to history
-            st.session_state.history.append(("Bot", bot_response))
-
-            # Clear the input after sending
-            st.session_state.user_input = ""
-
-    # Display the conversation history
-    if st.session_state.history:
-        st.write("## Conversation:")
-        for speaker, message in st.session_state.history:
-            st.markdown(f"**{speaker}:** {message}")
+                initialize_gemini()
+                response = chat_with_gemini(prompt)
+                st.markdown(response)
+        
+        # Add assistant response to chat history
+        st.session_state.messages.append({"role": "assistant", "content": response})
 
 if __name__ == "__main__":
     main()
